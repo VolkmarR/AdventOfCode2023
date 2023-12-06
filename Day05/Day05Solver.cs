@@ -5,13 +5,17 @@ public class Day05Tests
     private readonly ITestOutputHelper _output;
     public Day05Tests(ITestOutputHelper output) => _output = output;
 
-    [Fact] public void Step1WithExample() => new Day05Solver().ExecuteExample1("35");
+    [Fact]
+    public void Step1WithExample() => new Day05Solver().ExecuteExample1("35");
 
-    [Fact] public void Step2WithExample() => new Day05Solver().ExecuteExample2("46");
+    [Fact]
+    public void Step2WithExample() => new Day05Solver().ExecuteExample2("46");
 
-    [Fact] public void Step1WithPuzzleInput() => _output.WriteLine(new Day05Solver().ExecutePuzzle1());
+    [Fact]
+    public void Step1WithPuzzleInput() => _output.WriteLine(new Day05Solver().ExecutePuzzle1());
 
-    [Fact] public void Step2WithPuzzleInput() => _output.WriteLine(new Day05Solver().ExecutePuzzle2());
+    [Fact]
+    public void Step2WithPuzzleInput() => _output.WriteLine(new Day05Solver().ExecutePuzzle2());
 }
 
 public class Day05Solver : SolverBase
@@ -21,24 +25,34 @@ public class Day05Solver : SolverBase
 
     class Range
     {
-        public long FromBegin { get; set; }
-        public long FromEnd { get; set; }
-        public long ToBegin { get; set; }
-        public long ToEnd { get; set; }
+        public long FromBegin;
+        public long FromEnd;
+        public long ToBegin;
     }
 
     class Map
     {
-        public string From { get; set; }
-        public string To { get; set; }
-        public List<Range> Ranges { get; set; } = new();
+        public string From;
+        public string To;
+        public List<Range> Ranges = new();
+        public long FromMin;
+        public long FromMax;
 
         public long MapFrom(long value)
         {
-            foreach (var item in Ranges)
+            if (value >= FromMin && value <= FromMax)
             {
-                if (item.FromBegin <= value && value <= item.FromEnd)
-                    return item.ToBegin + value - item.FromBegin;
+                for (int i = 0; i < Ranges.Count; i++)
+                {
+                    var item = Ranges[i];
+                    if (value <= item.FromEnd)
+                    {
+                        if (item.FromBegin <= value)
+                            return item.ToBegin + value - item.FromBegin;
+                        else
+                            return value;
+                    }
+                }
             }
 
             return value;
@@ -61,8 +75,20 @@ public class Day05Solver : SolverBase
             else
             {
                 var parts = line.Split(' ').Select(q => q.ToLong()).ToArray();
-                map.Ranges.Add(new Range { ToBegin = parts[0], ToEnd = parts[0] + parts[2] - 1, FromBegin = parts[1], FromEnd = parts[1] + parts[2] - 1 });
+                map.Ranges.Add(new Range
+                {
+                    ToBegin = parts[0], 
+                    FromBegin = parts[1],
+                    FromEnd = parts[1] + parts[2] - 1
+                });
             }
+        }
+
+        foreach (var item in _maps.Values)
+        {
+            item.Ranges = item.Ranges.OrderBy(q => q.FromBegin).ToList();
+            item.FromMin = item.Ranges[0].FromBegin;
+            item.FromMax = item.Ranges.Last().FromEnd;
         }
     }
 
@@ -75,6 +101,7 @@ public class Day05Solver : SolverBase
             nextMap = map.To;
             current = map.MapFrom(current);
         }
+
         return current;
     }
 
@@ -93,7 +120,7 @@ public class Day05Solver : SolverBase
     protected override object Solve2()
     {
         var result = long.MaxValue;
-        for (var i = 0; i < _seeds.Count; i+=2)
+        for (var i = 0; i < _seeds.Count; i += 2)
         {
             for (long seed = _seeds[i]; seed < _seeds[i] + _seeds[i + 1]; seed++)
             {
@@ -101,6 +128,7 @@ public class Day05Solver : SolverBase
                 result = Math.Min(result, location);
             }
         }
+
         return result;
     }
 }
