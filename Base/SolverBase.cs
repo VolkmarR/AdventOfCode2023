@@ -2,7 +2,7 @@
 
 public abstract class SolverBase
 {
-    private string DayDirectory => $@"{AppContext.BaseDirectory[..AppContext.BaseDirectory.IndexOf("bin")]}\{GetType().Name[..5]}\";
+    protected string DayDirectory => $@"{AppContext.BaseDirectory[..AppContext.BaseDirectory.IndexOf("bin")]}\{GetType().Name[..5]}\";
 
     private List<string> Load(string inputFileName)
         => File.ReadAllLines($"{DayDirectory}{inputFileName}").ToList();
